@@ -12,13 +12,18 @@ sanitize_check() {
 }
 
 codestyle_check() {
-	git diff -U0 --no-color --staged HEAD | clang-format-diff -p1		
+	check=$(clang-format -Werror --dry-run --style=Google main.cpp > /dev/null 2>&1)
+	if [ $? -eq 0 ]; then
+		echo "Code-style check OK"
+	else	
+		clang-format -Werror --dry-run --style=Google main.cpp
+	fi	
 }
 
 
 benchmark_time() {
-	start=$(date +%s.%N)
 	make release > /dev/null
+	start=$(date +%s.%N)
 	./release_main > /dev/null 2>&1
 	end=$(date +%s.%N)
 	runtime=$(echo $end - $start | bc)
